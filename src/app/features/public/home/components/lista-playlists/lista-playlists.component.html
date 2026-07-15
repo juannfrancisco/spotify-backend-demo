@@ -1,0 +1,55 @@
+<div class="flex flex-col h-full">
+
+  <!-- Header -->
+  <div class="px-5 py-4 border-b border-border shrink-0 flex items-center justify-between">
+    <h2 class="text-sm font-semibold uppercase tracking-widest text-muted-foreground">Playlists</h2>
+    <button
+      type="button"
+      (click)="modalVisible.set(true)"
+      title="Nueva playlist"
+      class="w-7 h-7 flex items-center justify-center rounded-md text-muted-foreground hover:text-foreground hover:bg-muted transition-colors"
+    >
+      <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4" />
+      </svg>
+    </button>
+  </div>
+
+  <!-- Lista -->
+  <ul class="flex-1 overflow-y-auto py-2 scrollbar-thin scrollbar-thumb-muted scrollbar-track-transparent">
+    @for (playlist of playlists(); track playlist.id) {
+      <li class="group flex items-center gap-3 px-4 py-3 cursor-pointer hover:bg-muted transition-colors duration-150 rounded-none">
+
+        <!-- Ícono playlist -->
+        <div class="w-10 h-10 rounded-md bg-primary/10 flex items-center justify-center shrink-0">
+          <svg class="w-5 h-5 text-primary" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round"
+              d="M9 19V6l12-3v13M9 19c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zm12-3c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zM9 10l12-3" />
+          </svg>
+        </div>
+
+        <div class="flex flex-col min-w-0 flex-1">
+          <span class="text-sm font-medium text-foreground truncate">{{ playlist.nombre }}</span>
+          <span class="text-xs text-muted-foreground">{{ playlist.canciones.length }} canciones</span>
+        </div>
+
+        <!-- Flecha al hover -->
+        <svg class="w-4 h-4 text-muted-foreground opacity-0 group-hover:opacity-100 transition-opacity shrink-0"
+          fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7" />
+        </svg>
+
+      </li>
+    } @empty {
+      <li class="px-5 py-8 text-sm text-muted-foreground text-center">Sin playlists</li>
+    }
+  </ul>
+
+</div>
+
+@if (modalVisible()) {
+  <app-nueva-playlist-modal
+    (confirmar)="crearPlaylist($event)"
+    (cerrar)="modalVisible.set(false)"
+  />
+}

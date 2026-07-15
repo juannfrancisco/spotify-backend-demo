@@ -1,0 +1,9 @@
+/* Cambia el color del icono del calendario */
+.calendar-custom::-webkit-calendar-picker-indicator {
+    filter: invert(1); /* Este filtro genera un color azul */
+  }
+  
+  /* Para modo oscuro */
+  .dark .calendar-custom::-webkit-calendar-picker-indicator {
+    filter: invert(1); /* Hace que el icono sea blanco en modo oscuro */
+  }

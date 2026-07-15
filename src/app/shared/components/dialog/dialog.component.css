@@ -1,0 +1,32 @@
+/* Estilos específicos para el componente de diálogo */
+
+.dialog-overlay {
+  backdrop-filter: blur(2px);
+}
+
+.dialog-content {
+  max-height: 90vh;
+  overflow-y: auto;
+}
+
+.dialog-header {
+  border-bottom: 1px solid var(--border-color, #e5e7eb);
+}
+
+.dialog-footer {
+  border-top: 1px solid var(--border-color, #e5e7eb);
+}
+
+.dialog-close-button:hover {
+  transform: scale(1.1);
+}
+
+.dialog-button {
+  min-width: 120px;
+  height: 40px;
+  transition: all 0.2s ease-in-out;
+}
+
+.dialog-button:hover {
+  transform: translateY(-1px);
+}

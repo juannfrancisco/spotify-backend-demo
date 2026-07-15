@@ -1,0 +1,54 @@
+<nav aria-label="breadcrumb" class="my-3 ps-2">
+  <ol class="flex flex-wrap items-center gap-1 text-sm text-muted-foreground">
+
+    @for (item of items; track item.label; let last = $last; let first = $first) {
+
+      <!-- Item -->
+      <li class="flex items-center gap-1">
+
+        @if (!last) {
+          <!-- Link -->
+          <a
+            [routerLink]="item.path"
+            class="flex items-center gap-1 font-medium text-muted-foreground hover:text-foreground transition-colors"
+          >
+            @if (item.icon) {
+              <svg-icon [src]="item.icon" [svgClass]="'h-4 w-4'"></svg-icon>
+            }
+            {{ item.label }}
+          </a>
+
+          <!-- Separator -->
+          <span aria-hidden="true" class="select-none text-muted-foreground/50">
+            @switch (separator) {
+              @case ('chevron') {
+                <svg-icon src="icons/heroicons/solid/chevron-right.svg" [svgClass]="'h-3.5 w-3.5'"></svg-icon>
+              }
+              @case ('slash') {
+                <span>/</span>
+              }
+              @case ('dot') {
+                <span>·</span>
+              }
+            }
+          </span>
+
+        } @else {
+          <!-- Current page (last item) -->
+          <span
+            class="flex items-center gap-1 font-semibold text-foreground"
+            aria-current="page"
+          >
+            @if (item.icon) {
+              <svg-icon [src]="item.icon" [svgClass]="'h-4 w-4'"></svg-icon>
+            }
+            {{ item.label }}
+          </span>
+        }
+
+      </li>
+
+    }
+
+  </ol>
+</nav>

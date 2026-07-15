@@ -1,0 +1,39 @@
+@if (isOpen) {
+  <!-- Backdrop -->
+  <div
+    class="fixed inset-0 z-50 bg-black/40 dark:bg-black/60 backdrop-blur-sm animate-fade-in"
+    role="presentation"
+    (click)="onBackdropClick()"
+    (keydown)="$event.key === 'Escape' && onBackdropClick()">
+  </div>
+
+  <!-- Panel -->
+  <div
+    class="fixed inset-y-0 right-0 z-50 flex flex-col bg-background border-l border-border shadow-2xl shadow-black/20 dark:shadow-black/50 animate-slide-in-right" [ngClass]="panelWidthClass"
+    role="dialog"
+    aria-modal="true"
+    [attr.aria-label]="title"
+    (click)="$event.stopPropagation()"
+    (keydown)="$event.stopPropagation()">
+
+    <!-- Header -->
+    <div class="flex items-center justify-between px-6 py-4 border-b border-border shrink-0">
+      <h2 class="text-lg font-semibold text-foreground tracking-tight">{{ title }}</h2>
+      <button
+        type="button"
+        class="flex items-center justify-center h-8 w-8 rounded-lg text-muted-foreground hover:text-foreground hover:bg-muted focus:outline-none focus-visible:ring-2 focus-visible:ring-primary transition-colors duration-150 cursor-pointer"
+        aria-label="Cerrar panel"
+        (click)="close.emit()">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" class="h-5 w-5">
+          <path d="M6.28 5.22a.75.75 0 0 0-1.06 1.06L8.94 10l-3.72 3.72a.75.75 0 1 0 1.06 1.06L10 11.06l3.72 3.72a.75.75 0 1 0 1.06-1.06L11.06 10l3.72-3.72a.75.75 0 0 0-1.06-1.06L10 8.94 6.28 5.22Z" />
+        </svg>
+      </button>
+    </div>
+
+    <!-- Content -->
+    <div class="flex-1 overflow-y-auto px-6 py-5">
+      <ng-content></ng-content>
+    </div>
+
+  </div>
+}

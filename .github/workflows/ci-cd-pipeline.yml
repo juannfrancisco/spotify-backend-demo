@@ -1,0 +1,81 @@
+name: CI - Angular + Sonar
+
+on:
+  push:
+    branches: [ "main", "dev", "develop" ]
+  pull_request:
+    branches: [ "main", "dev", "develop" ]
+
+jobs:
+  Build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: "24"
+
+      - name: Install deps (npm/yarn)
+        shell: bash
+        run: |
+          if [ -f yarn.lock ]; then
+            corepack enable
+            yarn install --immutable || yarn install --frozen-lockfile
+          else
+            npm ci
+          fi
+
+      - name: Unit tests + coverage
+        shell: bash
+        run: |
+          if [ -f yarn.lock ]; then
+            if yarn run | grep -q "test:coverage"; then
+              yarn test:coverage
+            else
+              yarn test --watch=false --code-coverage --browsers=ChromeHeadless
+            fi
+          else
+            npm run test:coverage --if-present || npm run test:ci --if-present || npm test -- --watch=false --code-coverage --browsers=ChromeHeadless
+          fi
+
+      - name: Normalize lcov path
+        shell: bash
+        run: |
+          set -euo pipefail
+          LCOV="$(find coverage -type f -name lcov.info | head -n 1 || true)"
+          if [ -z "$LCOV" ]; then
+            echo "coverage/lcov.info was not generated"
+            exit 1
+          fi
+          TARGET="coverage/lcov.info"
+          mkdir -p coverage
+          if [ "$LCOV" != "$TARGET" ]; then
+            cp "$LCOV" "$TARGET"
+          else
+            echo "lcov already normalized at ${TARGET}"
+          fi
+
+      - name: Upload Sonar inputs
+        uses: actions/upload-artifact@v4
+        with:
+          name: sonar-inputs
+          path: coverage/lcov.info
+          if-no-files-found: error
+
+  Sonar:
+    needs: Build
+    uses: Zenta-Group/znt-template-github-pipeline/.github/workflows/job_sonarqube-scan.yaml@v1.7.6-alpha
+    with:
+      environment: "ci"
+      use_env: true
+      artifact_name: sonar-inputs
+      quality_gate: true
+      sonar_args: >-
+        -Dsonar.sources=src
+        -Dsonar.tests=src
+        -Dsonar.test.inclusions=**/*.spec.ts
+        -Dsonar.javascript.lcov.reportPaths=coverage/lcov.info
+    secrets:
+      SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}

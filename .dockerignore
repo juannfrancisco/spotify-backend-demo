@@ -1,0 +1,40 @@
+# Evitar dependencias locales
+node_modules
+npm-debug.log
+yarn.lock
+yarn-error.log
+
+# Evitar build local (será generado dentro del contenedor)
+dist
+out-tsc
+.angular/cache
+
+# Archivos del sistema
+.DS_Store
+Thumbs.db
+
+# Archivos del editor/IDE
+.vscode
+.idea
+*.sublime-project
+*.sublime-workspace
+
+# Archivos de test y cobertura
+coverage
+*.spec.ts
+test.ts
+karma.conf.js
+jest.config.js
+
+# Archivos de control de versiones
+.git
+.gitignore
+.gitattributes
+
+# Archivos temporales
+*.log
+*.tmp
+
+# Archivos de configuración sensibles
+.env
+.env.*

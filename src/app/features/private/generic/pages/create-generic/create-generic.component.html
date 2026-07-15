@@ -1,0 +1,131 @@
+<app-breadcrumb
+  [items]="[
+    { label: '', path: '/private/home', icon: 'icons/heroicons/solid/home.svg' },
+    { label: 'Genérico', path: '/private/generic/history' },
+    { label: 'Crear Registro' }
+  ]"
+  separator="chevron"
+/>
+
+<!-- Header -->
+<app-header-container [title]="'Crear Registro'" [subtitle]="'Template Zenta - Angular'"></app-header-container>
+<!-- end Header -->
+
+<div class="bg-background flex min-w-full flex-col space-y-4 rounded-xl border border-border p-6">
+  <form [formGroup]="form" (ngSubmit)="onSubmit()" class="space-y-6">
+    <div class="grid grid-cols-1 gap-6 md:grid-cols-2">
+      <div class="space-y-2">
+        <label for="name" class="mb-2 block text-sm font-medium text-gray-900 dark:text-white">Nombre (*)</label>
+        <input
+          type="text"
+          id="name"
+          formControlName="name"
+          placeholder="Ej: Proyecto X"
+          [class]="
+            'bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white ' +
+            (form.get('name')?.invalid && form.get('name')?.touched
+              ? 'dark:ring-red-500 dark:border-red-500 border-red-500'
+              : 'dark:ring-blue-500 dark:border-blue-500')
+          " />
+      </div>
+      <div class="space-y-2">
+        <label for="date" class="mb-2 block text-sm font-medium text-gray-900 dark:text-white">Fecha (*)</label>
+        <input
+          type="date"
+          id="date"
+          formControlName="date"
+          [class]="
+            'calendar-custom bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white ' +
+            (form.get('date')?.invalid && form.get('date')?.touched
+              ? 'dark:ring-red-500 dark:border-red-500 border-red-500'
+              : 'dark:ring-blue-500 dark:border-blue-500')
+          " />
+      </div>
+    </div>
+
+    <div class="grid grid-cols-1 gap-6 md:grid-cols-1">
+      <div class="space-y-2">
+        <label for="status" class="mb-2 block text-sm font-medium text-gray-900 dark:text-white">Estado (*)</label>
+        <select
+          id="status"
+          formControlName="status"
+          [class]="
+            'bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white ' +
+            (form.get('status')?.invalid && form.get('status')?.touched
+              ? 'dark:ring-red-500 dark:border-red-500 border-red-500'
+              : 'dark:ring-primary/20 dark:border-primary/20')
+          ">
+          <option value="">Selecciona un estado</option>
+          @for (status of statuses(); track status.id) {
+          <option [value]="status.name">{{ status.name }}</option>
+          }
+        </select>
+      </div>
+      <div class="space-y-2">
+        <label for="description" class="mb-2 block text-sm font-medium text-gray-900 dark:text-white"
+          >Descripción</label
+        >
+        <input
+          type="text"
+          id="description"
+          formControlName="description"
+          placeholder="Ej: Fueron solicidas de manera verbal..."
+          [class]="
+            'bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white ' +
+            (form.get('description')?.invalid && form.get('description')?.touched
+              ? 'dark:ring-red-500 dark:border-red-500 border-red-500'
+              : 'dark:ring-blue-500 dark:border-blue-500')
+          " />
+      </div>
+    </div>
+
+    <div class="text-muted-foreground text-sm">(*) Son obligatorios</div>
+
+    <div class="flex gap-4">
+      <app-button
+        (click)="onSubmit()"
+        [size]="'medium'"
+        [tone]="'primary'">
+        Enviar
+      </app-button>
+
+      <app-button
+        (click)="reset()"
+        [size]="'medium'"
+        [tone]="'light'">
+        Resetear
+      </app-button>
+    </div>
+  </form>
+</div>
+
+<app-dialog
+  [isOpen]="showDetailDialog()"
+  [title]="'Detalle de Asistencia Presencial a Ingresar'"
+  (close)="onCloseDialog()"
+  (confirm)="onConfirmDialog()"
+  [cancelText]="'Cerrar'"
+  [showConfirmButton]="true">
+  @if(recordToAdd()){
+  <div class="space-y-4">
+    <div class="grid grid-cols-2 gap-4">
+      <div class="col-span-2">
+        <p class="text-sm font-medium text-gray-500">Nombre</p>
+        <p class="text-base text-gray-400">{{ recordToAdd()?.name }}</p>
+      </div>
+      <div class="col-span-2">
+        <p class="text-sm font-medium text-gray-500">Descripción</p>
+        <p class="text-base text-gray-400">{{ recordToAdd()?.description }}</p>
+      </div>
+      <div class="col-span-1">
+        <p class="text-sm font-medium text-gray-500">Fecha</p>
+        <p class="text-base text-gray-400">{{ recordToAdd()?.date }}</p>
+      </div>
+      <div class="col-span-2">
+        <p class="text-sm font-medium text-gray-500">Estado</p>
+        <app-status-badge [status]="recordToAdd()!.status || ''"></app-status-badge>
+      </div>
+    </div>
+  </div>
+  }
+</app-dialog>

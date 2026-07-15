@@ -1,0 +1,51 @@
+<div class="scorecard" [style.--card-color]="resolvedColor()">
+  <!-- Accent line top -->
+  <div class="scorecard-accent"></div>
+
+  <!-- Background glow -->
+  <div class="scorecard-glow"></div>
+
+  <!-- Content -->
+  <div class="scorecard-body">
+
+    <!-- Header: title + icon -->
+    <div class="scorecard-header">
+      <span class="scorecard-title">{{ title() }}</span>
+
+      @if (icon()) {
+        <div class="scorecard-icon" [style.--icon-secondary]="resolvedIconColor()">
+          <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.75" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" [attr.d]="getIconPath()" />
+          </svg>
+        </div>
+      }
+    </div>
+
+    <!-- Value -->
+    <div class="scorecard-value-wrap">
+      @if (loading()) {
+        <ngx-skeleton-loader [theme]="{
+          'background-color': '#e2e8f0',
+          'dark-background-color': '#262626',
+          width: '72px',
+          height: '36px',
+          'border-radius': '6px',
+          margin: '0'
+        }" />
+      } @else {
+        <span class="scorecard-value">{{ value() }}</span>
+      }
+    </div>
+
+    <!-- Description -->
+    @if (description() && !loading()) {
+      <p class="scorecard-description">{{ description() }}</p>
+    }
+
+    <!-- Subtitle -->
+    @if (subtitle() && !loading()) {
+      <span class="scorecard-subtitle">{{ subtitle() }}</span>
+    }
+
+  </div>
+</div>

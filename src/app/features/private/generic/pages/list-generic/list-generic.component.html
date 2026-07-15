@@ -1,0 +1,39 @@
+
+<app-breadcrumb
+  [items]="[
+    { label: '', path: '/private/home', icon: 'icons/heroicons/solid/home.svg' },
+    { label: 'Genérico', path: '/private/generic/history' },
+    { label: 'Lista' }
+  ]"
+  separator="chevron"
+/>
+
+<!-- Header -->
+<app-header-container [title]="'Historial'" [subtitle]="'Template Zenta - Angular'"></app-header-container>
+<!-- end Header -->
+
+@if(isloading()){
+<app-skeleton-table></app-skeleton-table>
+} @else{
+<app-table 
+  [config]="tableConfig" 
+  [data]="records()" 
+  (viewDetail)="onViewDetail($event)"
+  (editItem)="onEditItem($event)"
+  (deleteItem)="onDeleteItem($event)"
+  (addNew)="onAddNew()"
+  (refresh)="onRefresh()">
+</app-table>
+
+<!-- Dialog de confirmación de eliminación -->
+<app-dialog-delete-confirmation
+  [isOpen]="showDeleteDialog()"
+  [itemName]="recordToDelete()?.name || ''"
+  [title]="'Confirmar Eliminación'"
+  [warningMessage]="'Esta acción no se puede deshacer.'"
+  [cancelText]="'Cancelar'"
+  [confirmText]="'Eliminar'"
+  (close)="onCloseDeleteDialog()"
+  (confirm)="onConfirmDelete()">
+</app-dialog-delete-confirmation>
+}

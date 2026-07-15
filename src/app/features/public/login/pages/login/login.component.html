@@ -1,0 +1,115 @@
+<div class="login-root">
+
+  <!-- ── Left panel (brand) — hidden on mobile ── -->
+  <div class="login-brand" aria-hidden="true">
+    <div class="login-brand__inner">
+      <div class="login-brand__logo-wrap">
+        <img src="images/isotipo.png" alt="Zenta" class="login-brand__isotipo" />
+      </div>
+      <h2 class="login-brand__title">Bienvenido a Zenta</h2>
+      <p class="login-brand__sub">Tu plataforma de gestión empresarial</p>
+
+      <div class="login-brand__blob login-brand__blob--1" aria-hidden="true"></div>
+      <div class="login-brand__blob login-brand__blob--2" aria-hidden="true"></div>
+    </div>
+  </div>
+
+  <!-- ── Right panel (form) ── -->
+  <div class="login-panel">
+    <div class="login-form-wrap animate-fade-in">
+
+      <!-- Mobile logo -->
+      <div class="login-mobile-logo">
+        <img src="images/isotipo.png" alt="Zenta" class="h-10 w-auto" />
+      </div>
+
+      <div class="login-heading">
+        <h1 class="login-heading__title">Iniciar sesión</h1>
+        <p class="login-heading__sub">Usa tu cuenta corporativa de Google</p>
+      </div>
+
+      <!-- Card wrapper (borde animado) -->
+      <div class="login-card-wrap" [class.login-card-wrap--loading]="isLoading()">
+      <div class="login-card">
+
+        <!-- ── Estado: procesando login ── -->
+        @if (isLoading()) {
+          <div class="login-processing" role="status" aria-live="polite">
+            <div class="login-processing__body">
+              <div class="login-spinner">
+                <span></span><span></span><span></span><span></span>
+              </div>
+              <p class="login-processing__label">Iniciando sesión…</p>
+              <div class="login-processing__dots" aria-hidden="true">
+                <span></span><span></span><span></span>
+              </div>
+            </div>
+          </div>
+        }
+
+        <!-- ── Estado: cargando SDK de Google ── -->
+        @if (!isLoading() && isGoogleLoading()) {
+          <div class="login-google-skeleton">
+            <div class="login-google-skeleton__bar shimmer"></div>
+            <div class="login-google-skeleton__caption shimmer"></div>
+          </div>
+        }
+
+        <!-- ── Estado: error al cargar Google ── -->
+        @if (!isLoading() && showRetryButton()) {
+          <div class="login-retry">
+            <div class="login-retry__icon">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                <path stroke-linecap="round" stroke-linejoin="round"
+                  d="M12 9v3.75m9-.75a9 9 0 1 1-18 0 9 9 0 0 1 18 0Zm-9 3.75h.008v.008H12v-.008Z" />
+              </svg>
+            </div>
+            <p class="login-retry__msg">No se pudo conectar con Google</p>
+            <button (click)="retryGoogleSignIn()" class="login-retry__btn">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="h-4 w-4">
+                <path stroke-linecap="round" stroke-linejoin="round"
+                  d="M16.023 9.348h4.992v-.001M2.985 19.644v-4.992m0 0h4.992m-4.993 0 3.181 3.183a8.25 8.25 0 0 0 13.803-3.7M4.031 9.865a8.25 8.25 0 0 1 13.803-3.7l3.181 3.182m0-4.991v4.99" />
+              </svg>
+              Reintentar
+            </button>
+          </div>
+        }
+
+        <!-- ── Botón Google (visible cuando todo está listo y no hay login en curso) ── -->
+        <div
+          id="signInDiv"
+          class="login-google-btn"
+          [class.login-google-btn--hidden]="isLoading() || isGoogleLoading() || showRetryButton()"
+        ></div>
+
+        <!-- Hint -->
+        @if (!isLoading() && !isGoogleLoading() && !showRetryButton()) {
+          <p class="login-hint">Solo cuentas &#64;zentagroup.com</p>
+        }
+
+        <!-- Error de autenticación -->
+        @if (errorMessage()) {
+          <div class="login-error" role="alert">
+            <svg class="login-error__icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+              <path stroke-linecap="round" stroke-linejoin="round"
+                d="M12 9v3.75m-9.303 3.376c-.866 1.5.217 3.374 1.948 3.374h14.71c1.73 0 2.813-1.874 1.948-3.374L13.949 3.378c-.866-1.5-3.032-1.5-3.898 0L2.697 16.126ZM12 15.75h.007v.008H12v-.008Z" />
+            </svg>
+            <p class="login-error__text">{{ errorMessage() }}</p>
+          </div>
+        }
+
+      </div>
+      </div>
+      <!-- /card -->
+
+      <!-- Footer -->
+      <div class="login-footer">
+        <span>v.{{ version }}</span>
+        <span class="login-footer__dot">&middot;</span>
+        <span>{{ environmentName }}</span>
+      </div>
+
+    </div>
+  </div>
+
+</div>

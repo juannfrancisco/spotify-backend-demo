@@ -1,0 +1,21 @@
+<div class="flex h-screen overflow-hidden bg-background text-foreground">
+
+  <!-- Columna izquierda: Playlists -->
+  <aside class="w-[320px] shrink-0 flex flex-col border-r border-border overflow-hidden">
+    <app-lista-playlists />
+  </aside>
+
+  <!-- Columna derecha: Artistas + Canciones -->
+  <div class="flex flex-col flex-1 overflow-hidden">
+
+    <section class="flex-1 overflow-hidden border-b border-border">
+      <app-lista-artistas />
+    </section>
+
+    <section class="flex-1 overflow-hidden">
+      <app-lista-canciones />
+    </section>
+
+  </div>
+
+</div>

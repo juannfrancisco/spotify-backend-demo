@@ -1,0 +1,51 @@
+cloudBuild:
+  path: deploy/google/cloudbuild.yaml
+  stepId: Build docker image
+  envProperty: args
+  mode: docker-build-args
+  staticEnv: []
+
+dockerfile:
+  path: Dockerfile
+  markers:
+    args:
+      start: '# set-env:args:start'
+      end: '# set-env:args:end'
+    env:
+      start: '# set-env:env:start'
+      end: '# set-env:env:end'
+  staticArgs: []
+  staticEnv: []
+
+environments:
+  development:
+    target: src/environments/environment.ts
+    dotenv: .env
+  production:
+    target: src/environments/environment.prod.ts
+    dotenv: null
+
+variables:
+  - id: NODE_ENV
+    ts: nodeEnv
+    cloudbuild: _NODE_ENV
+    required: true
+    type: string
+  - id: PRODUCTION
+    ts: production
+    cloudbuild: _PRODUCTION
+    required: true
+    type: boolean
+  - id: BACKEND_URL
+    ts: apiEndpoint
+    cloudbuild: _BACKEND_URL
+    required: true
+    type: string
+    sanitize: false
+  - id: GOOGLE_AUTH_CLIENT_ID
+    ts: googleAuthClientId
+    cloudbuild: _GOOGLE_AUTH_CLIENT_ID
+    required: false
+    type: string
+    sanitize: false
+    default: ''

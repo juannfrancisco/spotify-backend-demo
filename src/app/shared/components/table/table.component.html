@@ -1,0 +1,482 @@
+<div class="flex min-w-full flex-col overflow-hidden rounded-xl border border-border bg-background text-card-foreground dark:bg-card">
+
+  <!-- Toolbar: Search + Actions -->
+  @if (config().showSearch || config().showAddButton || config().selectFilters?.length) {
+    <div class="border-b border-border bg-background">
+      <div class="flex flex-col gap-3 p-4 sm:flex-row sm:items-center sm:justify-between">
+
+        <!-- Search input -->
+        @if (config().showSearch) {
+          <div class="relative w-full sm:max-w-xs">
+            <div class="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3" aria-hidden="true">
+              <svg class="h-4 w-4 text-muted-foreground" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="1.5">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-5.197-5.197m0 0A7.5 7.5 0 105.196 5.196a7.5 7.5 0 0010.607 10.607z" />
+              </svg>
+            </div>
+            <input
+              type="search"
+              id="table-search"
+              (input)="onSearchChange($event)"
+              aria-label="Buscar en la tabla"
+              class="flex h-9 w-full rounded-lg border border-gray-300 dark:border-gray-600 bg-background dark:bg-card px-3 py-2 pl-9 text-sm transition-colors duration-200 placeholder:text-muted-foreground focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20 disabled:cursor-not-allowed disabled:opacity-50"
+              placeholder="Buscar..." />
+          </div>
+        }
+
+        <!-- Action buttons -->
+        <div class="flex flex-shrink-0 items-center gap-2">
+          @if (config().showAddButton) {
+            <button
+              type="button"
+              (click)="addNew.emit()"
+              class="inline-flex h-9 cursor-pointer items-center justify-center gap-2 rounded-lg bg-primary px-4 text-sm font-medium text-primary-foreground transition-all duration-200 hover:bg-primary/90 hover:shadow-md focus:outline-none focus:ring-2 focus:ring-primary/20 focus:ring-offset-2 active:scale-[0.98]">
+              <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4" />
+              </svg>
+              <span class="hidden sm:inline">Agregar</span>
+            </button>
+          }
+          @if (config().selectFilters?.length) {
+            <button
+              type="button"
+              (click)="showFilters.set(!showFilters())"
+              [attr.aria-expanded]="showFilters()"
+              aria-label="Mostrar filtros"
+              title="Filtros"
+              [class]="showFilters()
+                ? 'inline-flex h-9 w-9 cursor-pointer items-center justify-center rounded-lg border border-primary bg-primary/10 text-primary transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-primary/20 focus:ring-offset-2 active:scale-[0.97]'
+                : 'inline-flex h-9 w-9 cursor-pointer items-center justify-center rounded-lg border border-input bg-background text-muted-foreground transition-all duration-200 hover:bg-muted/50 hover:text-foreground focus:outline-none focus:ring-2 focus:ring-primary/20 focus:ring-offset-2 active:scale-[0.97]'">
+              <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2a1 1 0 01-.293.707L13 13.414V19a1 1 0 01-.553.894l-4 2A1 1 0 017 21v-7.586L3.293 6.707A1 1 0 013 6V4z" />
+              </svg>
+            </button>
+          }
+          <button
+            type="button"
+            (click)="refresh.emit()"
+            aria-label="Actualizar registros"
+            title="Actualizar registros"
+            class="inline-flex h-9 w-9 cursor-pointer items-center justify-center rounded-lg border border-input bg-background text-muted-foreground transition-all duration-200 hover:bg-muted/50 hover:text-foreground focus:outline-none focus:ring-2 focus:ring-primary/20 focus:ring-offset-2 active:scale-[0.97]">
+            <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+            </svg>
+          </button>
+        </div>
+      </div>
+
+      <!-- Select filters panel -->
+      @if (showFilters() && config().selectFilters?.length) {
+        <div class="flex flex-wrap items-center gap-3 border-t border-border/60 px-4 py-3">
+          @for (filter of config().selectFilters; track filter.field) {
+            <div class="flex items-center gap-1.5">
+              <label [for]="'filter-' + filter.field" class="whitespace-nowrap text-xs text-muted-foreground">{{ filter.label }}</label>
+              <select
+                [id]="'filter-' + filter.field"
+                (change)="onSelectFilterChange(filter.field, $event)"
+                class="h-8 cursor-pointer rounded-lg border border-gray-300 dark:border-gray-600 bg-background dark:bg-card px-2 py-1 pe-7 text-sm transition-colors duration-200 focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20">
+                <option value="">Todos</option>
+                @for (option of selectFilterOptions()[filter.field]; track option) {
+                  <option [value]="option">{{ option }}</option>
+                }
+              </select>
+            </div>
+          }
+        </div>
+      }
+    </div>
+  }
+
+  <!-- Desktop Table -->
+  <div class="relative hidden w-full overflow-auto md:block" role="region" aria-label="Tabla de datos" tabindex="0">
+    <table
+      class="w-full caption-bottom border-collapse"
+      [class]="config().textSize === 'xs' ? 'text-xs' : config().textSize === 'md' ? 'text-base' : config().textSize === 'lg' ? 'text-lg' : 'text-sm'"
+      role="grid">
+      <thead>
+        <tr class="border-b border-border bg-muted/30">
+          @for (column of config().columns; track column.field) {
+            <th
+              scope="col"
+              class="h-10 cursor-pointer select-none whitespace-nowrap px-4 text-left align-middle text-xs font-semibold uppercase tracking-wider text-muted-foreground transition-colors duration-150 hover:bg-muted/50 hover:text-foreground"
+              [class]="column.width ?? ''"
+              [attr.aria-sort]="sortField() === column.field ? (sortDirection() === 'asc' ? 'ascending' : 'descending') : 'none'"
+              (click)="onSort(column.field)"
+              (keydown.enter)="onSort(column.field)"
+              (keydown.space)="onSort(column.field); $event.preventDefault()"
+              tabindex="0"
+              role="columnheader">
+              <div class="flex items-center gap-1.5">
+                <span>{{ column.title }}</span>
+                <!-- Sort indicator -->
+                <span class="flex flex-col leading-none" aria-hidden="true">
+                  @if (sortField() === column.field) {
+                    @if (sortDirection() === 'asc') {
+                      <svg class="h-3.5 w-3.5 text-primary" fill="currentColor" viewBox="0 0 20 20">
+                        <path fill-rule="evenodd" d="M14.707 12.707a1 1 0 01-1.414 0L10 9.414l-3.293 3.293a1 1 0 01-1.414-1.414l4-4a1 1 0 011.414 0l4 4a1 1 0 010 1.414z" clip-rule="evenodd" />
+                      </svg>
+                    } @else {
+                      <svg class="h-3.5 w-3.5 text-primary" fill="currentColor" viewBox="0 0 20 20">
+                        <path fill-rule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clip-rule="evenodd" />
+                      </svg>
+                    }
+                  } @else {
+                    <svg class="h-3.5 w-3.5 text-muted-foreground/40" fill="currentColor" viewBox="0 0 20 20">
+                      <path d="M7 7l3-3 3 3m0 6l-3 3-3-3" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" />
+                    </svg>
+                  }
+                </span>
+              </div>
+            </th>
+          }
+          @if (config().showActions) {
+            <th
+              scope="col"
+              class="h-10 whitespace-nowrap px-4 text-right align-middle text-xs font-semibold uppercase tracking-wider text-muted-foreground"
+              role="columnheader">
+              Acciones
+            </th>
+          }
+        </tr>
+      </thead>
+      <tbody class="divide-y divide-border">
+        @if (!hasData()) {
+          <tr>
+            <td
+              [attr.colspan]="totalColumnsCount()"
+              class="p-12 text-center align-middle">
+              <div class="flex flex-col items-center justify-center gap-3">
+                <div class="flex h-14 w-14 items-center justify-center rounded-full bg-muted/50">
+                  <svg class="h-7 w-7 text-muted-foreground/60" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="1.5">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-5.197-5.197m0 0A7.5 7.5 0 105.196 5.196a7.5 7.5 0 0010.607 10.607z" />
+                  </svg>
+                </div>
+                <div class="space-y-1">
+                  <p class="text-sm font-medium text-foreground">No se encontraron registros</p>
+                  <p class="text-xs text-muted-foreground">Intenta ajustar los filtros de busqueda o agrega un nuevo registro.</p>
+                </div>
+              </div>
+            </td>
+          </tr>
+        } @else {
+          @for (item of filteredData(); track item; let idx = $index) {
+            <tr
+              class="group border-b border-border transition-colors duration-150 even:bg-muted/5 hover:bg-muted/30"
+              role="row">
+              @for (column of config().columns; track column.field) {
+                <td class="px-4 py-3 align-middle" [class]="column.width ?? ''" role="gridcell">
+                  @switch (column.type) {
+                    @case ('percentage') {
+                      @if (column.percentageMode === 'text') {
+                        <span class="text-foreground">{{ item[column.field] !== null ? item[column.field] : '-' }}{{ item[column.field] !== null ? '%' : '' }}</span>
+                      } @else if (item[column.field] !== null) {
+                        <div class="flex items-center gap-3">
+                          <div class="h-2 w-full overflow-hidden rounded-full bg-muted">
+                            <div
+                              class="h-full rounded-full bg-primary transition-all duration-300"
+                              [style.width.%]="item[column.field] < 0 ? 0 : item[column.field] > 100 ? 100 : item[column.field]">
+                            </div>
+                          </div>
+                          <span class="min-w-12 text-right tabular-nums text-foreground">
+                            {{ item[column.field] }}%
+                          </span>
+                        </div>
+                      } @else {
+                        <span class="text-muted-foreground">-</span>
+                      }
+                    }
+                    @case ('status') {
+                      @if(item[column.field]) {
+                         <app-status-badge [status]="item[column.field]" />
+                      } @else {
+                        <span class="text-muted-foreground">-</span>
+                      }
+                    }
+                    @case ('link') {
+                      <a
+                        [routerLink]="[config().linkViewDetail, item[config().nameKey || 'id']]"
+                        class="font-medium text-primary underline-offset-4 transition-colors duration-150 hover:text-primary/80 hover:underline focus:outline-none focus:ring-2 focus:ring-primary/20 focus:ring-offset-1"
+                        [attr.aria-label]="'Ver detalle de ' + item[column.field]">
+                        {{ item[column.field] }}
+                      </a>
+                    }
+                    @case ('date') {
+                      <span class="tabular-nums text-muted-foreground">{{ item[column.field] | date: 'dd/MM/yyyy' }}</span>
+                    }
+                    @case ('icon') {
+                      <svg-icon [src]="item[column.field]" [svgClass]="'h-5 w-5 text-muted-foreground'" />
+                    }
+                    @case ('boolean') {
+                      <span [class]="getBooleanBadgeClass(item[column.field])">
+                        {{ getBooleanText(item[column.field]) }}
+                      </span>
+                    }
+                    @default {
+                      <span class="text-foreground">{{ item[column.field] }}</span>
+                    }
+                  }
+                </td>
+              }
+              @if (config().showActions) {
+                <td class="px-4 py-3 align-middle" role="gridcell">
+                  <div class="flex items-center justify-end gap-1">
+                    @if (config().showViewDetail) {
+                      <button
+                        type="button"
+                        (click)="viewDetail.emit(item)"
+                        [attr.aria-label]="'Ver detalles'"
+                        title="Ver detalles"
+                        class="inline-flex h-8 w-8 cursor-pointer items-center justify-center rounded-lg text-muted-foreground opacity-70 transition-all duration-150 hover:bg-blue-100 hover:text-blue-600 hover:opacity-100 focus:outline-none focus:ring-2 focus:ring-blue-500/20 group-hover:opacity-100 dark:hover:bg-blue-900/30 dark:hover:text-blue-400">
+                        <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="1.5">
+                          <path stroke-linecap="round" stroke-linejoin="round" d="M2.036 12.322a1.012 1.012 0 010-.639C3.423 7.51 7.36 4.5 12 4.5c4.638 0 8.573 3.007 9.963 7.178.07.207.07.431 0 .639C20.577 16.49 16.64 19.5 12 19.5c-4.638 0-8.573-3.007-9.963-7.178z" />
+                          <path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                        </svg>
+                      </button>
+                    }
+                    @if (config().showEdit) {
+                      <button
+                        type="button"
+                        (click)="editItem.emit(item)"
+                        [attr.aria-label]="'Editar registro'"
+                        title="Editar registro"
+                        class="inline-flex h-8 w-8 cursor-pointer items-center justify-center rounded-lg text-muted-foreground opacity-70 transition-all duration-150 hover:bg-amber-100 hover:text-amber-600 hover:opacity-100 focus:outline-none focus:ring-2 focus:ring-amber-500/20 group-hover:opacity-100 dark:hover:bg-amber-900/30 dark:hover:text-amber-400">
+                        <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="1.5">
+                          <path stroke-linecap="round" stroke-linejoin="round" d="M16.862 4.487l1.687-1.688a1.875 1.875 0 112.652 2.652L10.582 16.07a4.5 4.5 0 01-1.897 1.13L6 18l.8-2.685a4.5 4.5 0 011.13-1.897l8.932-8.931zm0 0L19.5 7.125M18 14v4.75A2.25 2.25 0 0115.75 21H5.25A2.25 2.25 0 013 18.75V8.25A2.25 2.25 0 015.25 6H10" />
+                        </svg>
+                      </button>
+                    }
+                    @if (config().showDelete) {
+                      <button
+                        type="button"
+                        (click)="deleteItem.emit(item)"
+                        [attr.aria-label]="'Eliminar registro'"
+                        title="Eliminar registro"
+                        class="inline-flex h-8 w-8 cursor-pointer items-center justify-center rounded-lg text-muted-foreground opacity-70 transition-all duration-150 hover:bg-red-100 hover:text-red-600 hover:opacity-100 focus:outline-none focus:ring-2 focus:ring-red-500/20 group-hover:opacity-100 dark:hover:bg-red-900/30 dark:hover:text-red-400">
+                        <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="1.5">
+                          <path stroke-linecap="round" stroke-linejoin="round" d="M14.74 9l-.346 9m-4.788 0L9.26 9m9.968-3.21c.342.052.682.107 1.022.166m-1.022-.165L18.16 19.673a2.25 2.25 0 01-2.244 2.077H8.084a2.25 2.25 0 01-2.244-2.077L4.772 5.79m14.456 0a48.108 48.108 0 00-3.478-.397m-12 .562c.34-.059.68-.114 1.022-.165m0 0a48.11 48.11 0 013.478-.397m7.5 0v-.916c0-1.18-.91-2.164-2.09-2.201a51.964 51.964 0 00-3.32 0c-1.18.037-2.09 1.022-2.09 2.201v.916m7.5 0a48.667 48.667 0 00-7.5 0" />
+                        </svg>
+                      </button>
+                    }
+                  </div>
+                </td>
+              }
+            </tr>
+          }
+        }
+      </tbody>
+    </table>
+  </div>
+
+  <!-- Mobile Card Layout (visible on small screens) -->
+  <div class="block md:hidden">
+    @if (!hasData()) {
+      <div class="flex flex-col items-center justify-center gap-3 p-8">
+        <div class="flex h-14 w-14 items-center justify-center rounded-full bg-muted/50">
+          <svg class="h-7 w-7 text-muted-foreground/60" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="1.5">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-5.197-5.197m0 0A7.5 7.5 0 105.196 5.196a7.5 7.5 0 0010.607 10.607z" />
+          </svg>
+        </div>
+        <div class="space-y-1 text-center">
+          <p class="text-sm font-medium text-foreground">No se encontraron registros</p>
+          <p class="text-xs text-muted-foreground">Intenta ajustar los filtros de busqueda o agrega un nuevo registro.</p>
+        </div>
+      </div>
+    } @else {
+      <div class="divide-y divide-border">
+        @for (item of filteredData(); track item; let idx = $index) {
+          <div class="space-y-3 p-4 transition-colors duration-150 hover:bg-muted/20">
+            <!-- Card fields -->
+            <div class="grid grid-cols-2 gap-x-4 gap-y-2.5">
+              @for (column of config().columns; track column.field) {
+                <div class="flex flex-col gap-0.5" [class.col-span-2]="column.type === 'link'">
+                  <span class="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">{{ column.title }}</span>
+                  @switch (column.type) {
+                    @case ('status') {
+                      <app-status-badge [status]="item[column.field]" />
+                    }
+                    @case ('link') {
+                      <a
+                        [routerLink]="[config().linkViewDetail, item[config().nameKey || 'id']]"
+                        class="text-sm font-semibold text-primary underline-offset-4 hover:underline">
+                        {{ item[column.field] }}
+                      </a>
+                    }
+                    @case ('date') {
+                      <span class="text-sm tabular-nums text-muted-foreground">{{ item[column.field] | date: 'dd/MM/yyyy' }}</span>
+                    }
+                    @case ('boolean') {
+                      <span [class]="getBooleanBadgeClass(item[column.field])" class="w-fit">
+                        {{ getBooleanText(item[column.field]) }}
+                      </span>
+                    }
+                    @default {
+                      <span class="truncate text-sm text-foreground">{{ item[column.field] }}</span>
+                    }
+                  }
+                </div>
+              }
+            </div>
+
+            <!-- Card actions -->
+            @if (config().showActions) {
+              <div class="flex items-center justify-end gap-1 border-t border-border/50 pt-2.5">
+                @if (config().showViewDetail) {
+                  <button
+                    type="button"
+                    (click)="viewDetail.emit(item)"
+                    aria-label="Ver detalles"
+                    class="inline-flex h-8 cursor-pointer items-center gap-1.5 rounded-lg px-2.5 text-xs font-medium text-blue-600 transition-colors hover:bg-blue-100 dark:text-blue-400 dark:hover:bg-blue-900/30">
+                    <svg class="h-3.5 w-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="1.5">
+                      <path stroke-linecap="round" stroke-linejoin="round" d="M2.036 12.322a1.012 1.012 0 010-.639C3.423 7.51 7.36 4.5 12 4.5c4.638 0 8.573 3.007 9.963 7.178.07.207.07.431 0 .639C20.577 16.49 16.64 19.5 12 19.5c-4.638 0-8.573-3.007-9.963-7.178z" />
+                      <path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                    </svg>
+                    Ver
+                  </button>
+                }
+                @if (config().showEdit) {
+                  <button
+                    type="button"
+                    (click)="editItem.emit(item)"
+                    aria-label="Editar registro"
+                    class="inline-flex h-8 cursor-pointer items-center gap-1.5 rounded-lg px-2.5 text-xs font-medium text-amber-600 transition-colors hover:bg-amber-100 dark:text-amber-400 dark:hover:bg-amber-900/30">
+                    <svg class="h-3.5 w-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="1.5">
+                      <path stroke-linecap="round" stroke-linejoin="round" d="M16.862 4.487l1.687-1.688a1.875 1.875 0 112.652 2.652L10.582 16.07a4.5 4.5 0 01-1.897 1.13L6 18l.8-2.685a4.5 4.5 0 011.13-1.897l8.932-8.931zm0 0L19.5 7.125M18 14v4.75A2.25 2.25 0 0115.75 21H5.25A2.25 2.25 0 013 18.75V8.25A2.25 2.25 0 015.25 6H10" />
+                    </svg>
+                    Editar
+                  </button>
+                }
+                @if (config().showDelete) {
+                  <button
+                    type="button"
+                    (click)="deleteItem.emit(item)"
+                    aria-label="Eliminar registro"
+                    class="inline-flex h-8 cursor-pointer items-center gap-1.5 rounded-lg px-2.5 text-xs font-medium text-red-600 transition-colors hover:bg-red-100 dark:text-red-400 dark:hover:bg-red-900/30">
+                    <svg class="h-3.5 w-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="1.5">
+                      <path stroke-linecap="round" stroke-linejoin="round" d="M14.74 9l-.346 9m-4.788 0L9.26 9m9.968-3.21c.342.052.682.107 1.022.166m-1.022-.165L18.16 19.673a2.25 2.25 0 01-2.244 2.077H8.084a2.25 2.25 0 01-2.244-2.077L4.772 5.79m14.456 0a48.108 48.108 0 00-3.478-.397m-12 .562c.34-.059.68-.114 1.022-.165m0 0a48.11 48.11 0 013.478-.397m7.5 0v-.916c0-1.18-.91-2.164-2.09-2.201a51.964 51.964 0 00-3.32 0c-1.18.037-2.09 1.022-2.09 2.201v.916m7.5 0a48.667 48.667 0 00-7.5 0" />
+                    </svg>
+                    Eliminar
+                  </button>
+                }
+              </div>
+            }
+          </div>
+        }
+      </div>
+    }
+  </div>
+
+  <!-- Pagination Footer -->
+  <div
+    class="flex flex-col items-center justify-between gap-3 border-t border-border bg-background px-4 py-3 sm:flex-row"
+    role="navigation"
+    aria-label="Paginacion de la tabla">
+
+    <!-- Page size selector -->
+    <div class="flex items-center gap-2.5">
+      <label for="page-size-select" class="whitespace-nowrap text-xs text-muted-foreground">Filas por pagina</label>
+      <select
+        id="page-size-select"
+        (change)="onPageSizeChange($event)"
+        class="h-8 cursor-pointer rounded-lg border border-gray-300 dark:border-gray-600 bg-background dark:bg-card px-2 py-1 pe-5 text-xs transition-colors duration-200 focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20">
+        @for (size of config().pageSizes; track size) {
+          <option [value]="size">{{ size }}</option>
+        }
+      </select>
+    </div>
+
+    <!-- Pagination info and controls -->
+    <div class="flex flex-col items-center gap-3 sm:flex-row sm:gap-5">
+      <!-- Info text -->
+      <p class="text-xs text-muted-foreground" aria-live="polite">
+        @if (totalItems() > 0) {
+          <span class="font-medium text-foreground">{{ paginationStart() }}-{{ paginationEnd() }}</span>
+          de
+          <span class="font-medium text-foreground">{{ totalItems() }}</span>
+          registros
+        } @else {
+          0 registros
+        }
+      </p>
+
+      <!-- Page buttons -->
+      <div class="flex items-center gap-1" role="group" aria-label="Controles de paginacion">
+        <!-- First page -->
+        <button
+          type="button"
+          (click)="goToFirstPage()"
+          [disabled]="isFirstPage()"
+          aria-label="Primera pagina"
+          title="Primera pagina"
+          class="inline-flex h-8 w-8 cursor-pointer items-center justify-center rounded-lg border border-input bg-background text-muted-foreground transition-all duration-150 hover:bg-muted/50 hover:text-foreground focus:outline-none focus:ring-2 focus:ring-primary/20 disabled:pointer-events-none disabled:opacity-40">
+          <svg class="h-3.5 w-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M18.75 19.5l-7.5-7.5 7.5-7.5m-6 15L5.25 12l7.5-7.5" />
+          </svg>
+        </button>
+
+        <!-- Previous page -->
+        <button
+          type="button"
+          (click)="onPageChange(currentPage() - 1)"
+          [disabled]="isFirstPage()"
+          aria-label="Pagina anterior"
+          title="Pagina anterior"
+          class="inline-flex h-8 w-8 cursor-pointer items-center justify-center rounded-lg border border-input bg-background text-muted-foreground shadow-sm transition-all duration-150 hover:bg-muted/50 hover:text-foreground focus:outline-none focus:ring-2 focus:ring-primary/20 disabled:pointer-events-none disabled:opacity-40">
+          <svg class="h-3.5 w-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 19.5L8.25 12l7.5-7.5" />
+          </svg>
+        </button>
+
+        <!-- Page number buttons (hidden on very small screens) -->
+        <div class="hidden items-center gap-1 sm:flex">
+          @for (page of pageNumbers(); track page) {
+            @if (page < 0) {
+              <!-- Ellipsis -->
+              <span class="flex h-8 w-8 items-center justify-center text-xs text-muted-foreground" aria-hidden="true">...</span>
+            } @else {
+              <button
+                type="button"
+                (click)="onPageChange(page)"
+                [attr.aria-current]="page === currentPage() ? 'page' : null"
+                [attr.aria-label]="'Pagina ' + page"
+                [class]="page === currentPage()
+                  ? 'inline-flex h-8 w-8 cursor-pointer items-center justify-center rounded-lg bg-primary text-xs font-semibold text-primary-foreground shadow-sm transition-all duration-150 focus:outline-none focus:ring-2 focus:ring-primary/30 focus:ring-offset-1'
+                  : 'inline-flex h-8 w-8 cursor-pointer items-center justify-center rounded-lg border border-input bg-background text-xs font-medium text-foreground shadow-sm transition-all duration-150 hover:bg-muted/50 focus:outline-none focus:ring-2 focus:ring-primary/20'">
+                {{ page }}
+              </button>
+            }
+          }
+        </div>
+
+        <!-- Mobile page indicator -->
+        <span class="flex items-center px-2 text-xs font-medium text-muted-foreground sm:hidden">
+          {{ currentPage() }} / {{ totalPages() }}
+        </span>
+
+        <!-- Next page -->
+        <button
+          type="button"
+          (click)="onPageChange(currentPage() + 1)"
+          [disabled]="isLastPage()"
+          aria-label="Pagina siguiente"
+          title="Pagina siguiente"
+          class="inline-flex h-8 w-8 cursor-pointer items-center justify-center rounded-lg border border-input bg-background text-muted-foreground shadow-sm transition-all duration-150 hover:bg-muted/50 hover:text-foreground focus:outline-none focus:ring-2 focus:ring-primary/20 disabled:pointer-events-none disabled:opacity-40">
+          <svg class="h-3.5 w-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M8.25 4.5l7.5 7.5-7.5 7.5" />
+          </svg>
+        </button>
+
+        <!-- Last page -->
+        <button
+          type="button"
+          (click)="goToLastPage()"
+          [disabled]="isLastPage()"
+          aria-label="Ultima pagina"
+          title="Ultima pagina"
+          class="inline-flex h-8 w-8 cursor-pointer items-center justify-center rounded-lg border border-input bg-background text-muted-foreground shadow-sm transition-all duration-150 hover:bg-muted/50 hover:text-foreground focus:outline-none focus:ring-2 focus:ring-primary/20 disabled:pointer-events-none disabled:opacity-40">
+          <svg class="h-3.5 w-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M5.25 4.5l7.5 7.5-7.5 7.5m6-15l7.5 7.5-7.5 7.5" />
+          </svg>
+        </button>
+      </div>
+    </div>
+  </div>
+</div>

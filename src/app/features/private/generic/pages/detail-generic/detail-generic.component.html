@@ -1,0 +1,118 @@
+<app-breadcrumb
+  [items]="[
+    { label: '', path: '/private/home', icon: 'icons/heroicons/solid/home.svg' },
+    { label: 'Genérico', path: '/private/generic/history' },
+    { label: 'Detalle del registro' }
+  ]"
+  separator="chevron"
+/>
+
+<!-- Header -->
+<app-header-container 
+  [title]="'Detalle del Registro'" 
+  [subtitle]="record()?.name || 'Cargando...'"
+  [items]="[
+    {
+      label: 'Editar',
+      icon: 'icons/heroicons/outline/pencil-square.svg',
+      action: onEdit.bind(this)
+    }
+  ]">
+</app-header-container>
+
+<!-- Loading State -->
+@if (isLoading()) {
+  <div class="flex justify-center items-center min-h-[400px]">
+    <div class="animate-spin rounded-full h-12 w-12 border-b-2 border-primary"></div>
+    <span class="ml-3 text-gray-600">Cargando detalle...</span>
+  </div>
+}
+
+<!-- Content -->
+@if (!isLoading() && record()) {
+  <div class="bg-background border-border rounded-xl border  p-6 space-y-6">
+
+    <!-- Detail Content -->
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+      <!-- Left Column -->
+      <div class="space-y-6">
+        <!-- ID -->
+        <div class="bg-card rounded-lg p-4 border border-muted/10">
+          <h3 class="text-sm font-medium text-gray-500 mb-2">Identificador</h3>
+          <p class="text-base text-foreground font-mono bg-muted/20 px-3 py-2 rounded border">
+            {{ record()!.id }}
+          </p>
+        </div>
+
+        <!-- Name -->
+        <div class="bg-card rounded-lg p-4 border border-muted/10">
+          <h3 class="text-sm font-medium text-gray-500 mb-2">Nombre</h3>
+          <p class="text-lg font-semibold text-foreground">
+            {{ record()!.name }}
+          </p>
+        </div>
+
+        <!-- Description -->
+        <div class="bg-card rounded-lg p-4 border border-muted/10">
+          <h3 class="text-sm font-medium text-gray-500 mb-2">Descripción</h3>
+          <p class="text-base text-foreground leading-relaxed">
+            {{ record()!.description }}
+          </p>
+        </div>
+      </div>
+
+      <!-- Right Column -->
+      <div class="space-y-6">
+        <!-- Date -->
+        <div class="bg-card rounded-lg p-4 border border-muted/10">
+          <h3 class="text-sm font-medium text-gray-500 mb-2">Fecha</h3>
+          <div class="flex items-center gap-2">
+            <svg class="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
+            </svg>
+            <p class="text-base text-foreground">
+              {{ record()!.date }}
+            </p>
+          </div>
+        </div>
+
+        <!-- Status -->
+        <div class="bg-card rounded-lg p-4 border border-muted/10">
+          <h3 class="text-sm font-medium text-gray-500 mb-2">Estado</h3>
+          <app-status-badge [status]="record()!.status"></app-status-badge>
+        </div>
+
+        <!-- Metadata -->
+        <div class="bg-card rounded-lg p-4 border border-muted/10">
+          <h3 class="text-sm font-medium text-gray-500 mb-3">Información adicional</h3>
+          <div class="space-y-2 text-sm text-gray-600">
+            <div class="flex justify-between">
+              <span>Tipo de registro:</span>
+              <span class="font-medium">Genérico</span>
+            </div>
+            <div class="flex justify-between">
+              <span>Última actualización:</span>
+              <span class="font-medium">{{ record()!.date }}</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+}
+
+<!-- Error State -->
+@if (!isLoading() && !record()) {
+  <div class="flex flex-col items-center justify-center min-h-[400px] text-center">
+    <svg class="w-16 h-16 text-gray-300 mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
+    </svg>
+    <h3 class="text-lg font-medium text-gray-900 mb-2">Registro no encontrado</h3>
+    <p class="text-gray-600 mb-4">El registro solicitado no existe o ha sido eliminado.</p>
+    <button
+      (click)="onGoBack()"
+      class="px-4 py-2 bg-primary text-primary-foreground hover:bg-primary/90 rounded-md text-sm font-medium transition-colors cursor-pointer">
+      Volver al listado
+    </button>
+  </div>
+}

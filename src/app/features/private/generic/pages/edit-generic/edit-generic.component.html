@@ -1,0 +1,178 @@
+@if (record()) {
+  <app-breadcrumb
+    [items]="[
+      { label: '', path: '/private/home', icon: 'icons/heroicons/solid/home.svg' },
+      { label: 'Genérico', path: '/private/generic/history' },
+      { label: 'Detalle del Registro', path: '/private/generic/details/' + record()!.id },
+      { label: 'Editar Registro' }
+    ]"
+    separator="chevron"
+  />
+}
+
+<!-- Header -->
+<app-header-container [title]="'Editar Registro'" [subtitle]="'Template Zenta - Angular'"></app-header-container>
+<!-- end Header -->
+
+@if (isLoading()) {
+  <div class="flex justify-center items-center py-8">
+    <div class="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-500"></div>
+    <span class="ml-2 text-gray-600 dark:text-gray-400">Cargando registro...</span>
+  </div>
+} @else if (record()) {
+  <div class="bg-background flex min-w-full flex-col space-y-4 rounded-xl border border-border p-6">
+    <form [formGroup]="form" (ngSubmit)="onSubmit()" class="space-y-6">
+      <div class="grid grid-cols-1 gap-6 md:grid-cols-2">
+        <!-- ID Field (disabled) -->
+        <div class="space-y-2">
+          <label for="id" class="mb-2 block text-sm font-medium text-gray-900 dark:text-white">ID</label>
+          <input
+            type="text"
+            id="id"
+            formControlName="id"
+            readonly
+            class="bg-gray-100 border border-gray-300 text-gray-500 text-sm rounded-lg block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:text-gray-400 cursor-not-allowed" />
+          <p class="text-xs text-gray-500 dark:text-gray-400">Este campo no puede ser editado</p>
+        </div>
+        
+        <!-- Name Field -->
+        <div class="space-y-2">
+          <label for="name" class="mb-2 block text-sm font-medium text-gray-900 dark:text-white">Nombre (*)</label>
+          <input
+            type="text"
+            id="name"
+            formControlName="name"
+            placeholder="Ej: Proyecto X"
+            [class]="
+              'bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white ' +
+              (form.get('name')?.invalid && form.get('name')?.touched
+                ? 'dark:ring-red-500 dark:border-red-500 dark:border-red-500'
+                : 'dark:ring-blue-500 dark:border-blue-500')
+            " />
+        </div>
+      </div>
+
+      <div class="grid grid-cols-1 gap-6 md:grid-cols-2">
+        <!-- Date Field -->
+        <div class="space-y-2">
+          <label for="date" class="mb-2 block text-sm font-medium text-gray-900 dark:text-white">Fecha (*)</label>
+          <input
+            type="date"
+            id="date"
+            formControlName="date"
+            [class]="
+              'calendar-custom bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white ' +
+              (form.get('date')?.invalid && form.get('date')?.touched
+                ? 'dark:ring-red-500 dark:border-red-500 border-red-500'
+                : 'dark:ring-blue-500 dark:border-blue-500')
+            " />
+        </div>
+        
+        <!-- Status Field -->
+        <div class="space-y-2">
+          <label for="status" class="mb-2 block text-sm font-medium text-gray-900 dark:text-white">Estado (*)</label>
+          <select
+            id="status"
+            formControlName="status"
+            [class]="
+              'bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white ' +
+              (form.get('status')?.invalid && form.get('status')?.touched
+                ? 'dark:ring-red-500 dark:border-red-500 border-red-500'
+                : 'dark:ring-blue-500 dark:border-blue-500')
+            ">
+            <option value="">Selecciona un estado</option>
+            @for (status of statuses(); track status.id) {
+              <option [value]="status.name">{{ status.name }}</option>
+            }
+          </select>
+        </div>
+      </div>
+
+      <!-- Description Field -->
+      <div class="space-y-2">
+        <label for="description" class="mb-2 block text-sm font-medium text-gray-900 dark:text-white">Descripción (*)</label>
+        <textarea
+          id="description"
+          formControlName="description"
+          rows="4"
+          placeholder="Ej: Descripción detallada del registro..."
+          [class]="
+            'bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white ' +
+            (form.get('description')?.invalid && form.get('description')?.touched
+              ? 'dark:ring-red-500 dark:border-red-500 border-red-500'
+              : 'dark:ring-blue-500 dark:border-blue-500')
+          "></textarea>
+      </div>
+
+      <div class="text-muted-foreground text-sm">(*) Son obligatorios</div>
+
+      <!-- Action Buttons -->
+      <div class="flex gap-4">
+        <app-button
+          (click)="onSubmit()"
+          [size]="'medium'"
+          [tone]="'primary'">
+          Actualizar
+        </app-button>
+        <app-button
+          (click)="onReset()"
+          [size]="'medium'"
+          [tone]="'light'">
+          Resetear
+        </app-button>
+        <app-button
+          (click)="onCancel()"
+          [size]="'medium'"
+          [tone]="'danger'">
+          Cancelar
+        </app-button>
+      </div>
+    </form>
+  </div>
+}
+
+<!-- Confirmation Dialog -->
+<app-dialog
+  [isOpen]="showDetailDialog()"
+  [title]="'Confirmar Actualización'"
+  (close)="onCloseDialog()"
+  (confirm)="onConfirmDialog()"
+  [cancelText]="'Cancelar'"
+  [confirmText]="'Actualizar'"
+  [showConfirmButton]="true">
+  @if(recordToUpdate()){
+    <div class="space-y-4">
+      <p class="text-gray-700 dark:text-gray-300 mb-4">
+        ¿Estás seguro de que deseas actualizar este registro con los siguientes datos?
+      </p>
+      
+      <div class="grid grid-cols-2 gap-4">
+        <div class="space-y-2">
+          <div class="text-sm font-medium text-gray-600 dark:text-gray-400">ID:</div>
+          <div class="text-sm text-gray-900 dark:text-white">{{ recordToUpdate()!.id }}</div>
+        </div>
+        <div class="space-y-2">
+          <div class="text-sm font-medium text-gray-600 dark:text-gray-400">Nombre:</div>
+          <div class="text-sm text-gray-900 dark:text-white">{{ recordToUpdate()!.name }}</div>
+        </div>
+        <div class="space-y-2">
+          <div class="text-sm font-medium text-gray-600 dark:text-gray-400">Fecha:</div>
+          <div class="text-sm text-gray-900 dark:text-white">{{ recordToUpdate()!.date }}</div>
+        </div>
+        <div class="space-y-2">
+          <div class="text-sm font-medium text-gray-600 dark:text-gray-400">Estado:</div>
+          <div class="text-sm">
+            <app-status-badge [status]="recordToUpdate()!.status"></app-status-badge>
+          </div>
+        </div>
+      </div>
+      
+      <div class="space-y-2 col-span-2">
+        <div class="text-sm font-medium text-gray-600 dark:text-gray-400">Descripción:</div>
+        <div class="text-sm text-gray-900 dark:text-white bg-gray-50 dark:bg-gray-700 p-3 rounded-lg">
+          {{ recordToUpdate()!.description }}
+        </div>
+      </div>
+    </div>
+  }
+</app-dialog>

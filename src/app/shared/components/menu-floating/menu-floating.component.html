@@ -1,0 +1,22 @@
+<div class="text-end flex items-start gap-4">
+    <div class="relative">
+        <button (click)="toggleMenu()" class="p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors cursor-pointer"
+            aria-label="Menú de opciones">
+            <svg-icon src="icons/heroicons/outline/cog-6-tooth.svg" [svgClass]="'h-5 w-5 stroke-gray-600 dark:stroke-gray-200'"></svg-icon>
+        </button>
+        @if(isMenuOpen()) {
+            <div
+                class="absolute right-0 mt-2 w-48 bg-background border border-muted rounded-lg shadow-lg z-10 dark:border-gray-700">
+                <div class="py-1">
+                    @for (item of items; track item) {
+                    <button (click)="item.action()"
+                        class="w-full text-left px-4 py-2 text-sm text-foreground hover:bg-muted transition-colors flex items-center gap-2 cursor-pointer dark:hover:bg-gray-900 dark:hover:text-primary">
+                        <svg-icon [src]="item.icon" [svgClass]="'h-5 w-5 stroke-gray-600 dark:stroke-gray-200'"></svg-icon>
+                        {{ item.label }}
+                    </button>
+                    }
+                </div>
+            </div>
+        }
+    </div>
+</div>

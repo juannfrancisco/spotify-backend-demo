@@ -1,0 +1,52 @@
+/* Calendar custom styles */
+.calendar-custom::-webkit-calendar-picker-indicator {
+  filter: invert(1);
+  cursor: pointer;
+}
+
+/* Dark mode calendar icon */
+.dark .calendar-custom::-webkit-calendar-picker-indicator {
+  filter: invert(0);
+}
+
+/* Disabled field styles */
+input[readonly] {
+  cursor: not-allowed !important;
+}
+
+/* Form validation styles */
+.ng-invalid.ng-touched {
+  border-color: #ef4444 !important;
+}
+
+/* Loading animation */
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.animate-spin {
+  animation: spin 1s linear infinite;
+}
+
+/* Button hover effects */
+button:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 4px 8px rgb(0 0 0 / 10%);
+}
+
+button:active {
+  transform: translateY(0);
+}
+
+/* Form container */
+.bg-background {
+  background-color: var(--background, #fff);
+}
+
+/* Status badge container */
+.status-badge-container {
+  display: inline-flex;
+  align-items: center;
+}

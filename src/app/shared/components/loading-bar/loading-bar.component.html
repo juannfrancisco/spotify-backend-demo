@@ -1,0 +1,14 @@
+<div 
+  class="loading-bar-container"
+  [class.loading-bar-top]="position() === 'top'"
+  [class.loading-bar-bottom]="position() === 'bottom'"
+  [style.height.px]="height()">
+  <div 
+    class="loading-bar-progress"
+    [class.loading-bar-primary]="color() === 'primary'"
+    [class.loading-bar-secondary]="color() === 'secondary'"
+    [class.loading-bar-success]="color() === 'success'"
+    [class.loading-bar-warning]="color() === 'warning'"
+    [class.loading-bar-danger]="color() === 'danger'">
+  </div>
+</div>

@@ -1,0 +1,38 @@
+steps:
+  - id: Build docker image
+    name: gcr.io/cloud-builders/docker
+    args:
+      - build
+      - -t
+      - ${_REGION}-docker.pkg.dev/$PROJECT_ID/${_DOCKER_REPOSITORY}/${_COMPONENT_NAME}:$BUILD_ID
+      - --build-arg
+      - NODE_ENV=${_NODE_ENV}
+      - --build-arg
+      - PRODUCTION=${_PRODUCTION}
+      - --build-arg
+      - BACKEND_URL=${_BACKEND_URL}
+      - --build-arg
+      - GOOGLE_AUTH_CLIENT_ID=${_GOOGLE_AUTH_CLIENT_ID}
+      - .
+  - id: Push docker image
+    name: gcr.io/cloud-builders/docker
+    args:
+      - push
+      - ${_REGION}-docker.pkg.dev/$PROJECT_ID/${_DOCKER_REPOSITORY}/${_COMPONENT_NAME}:$BUILD_ID
+  - id: Deploy to Cloud Run
+    name: gcr.io/cloud-builders/gcloud
+    args:
+      - run
+      - deploy
+      - ${_COMPONENT_NAME}-${_ENV}
+      - --image
+      - ${_REGION}-docker.pkg.dev/$PROJECT_ID/${_DOCKER_REPOSITORY}/${_COMPONENT_NAME}:$BUILD_ID
+      - --region
+      - ${_REGION}
+      - --platform
+      - managed
+      - --allow-unauthenticated
+      - --port
+      - "80"
+options:
+  logging: CLOUD_LOGGING_ONLY

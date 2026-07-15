@@ -1,0 +1,10 @@
+/* Estilos específicos para el componente de diálogo de confirmación de eliminación */
+
+.delete-confirmation-content {
+  color: var(--text-color);
+}
+
+.warning-text {
+  font-style: italic;
+  opacity: 0.8;
+}

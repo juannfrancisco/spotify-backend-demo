@@ -1,0 +1,56 @@
+<div class="flex flex-col h-full">
+
+  <!-- Header -->
+  <div class="px-5 py-4 border-b border-border shrink-0">
+    <h2 class="text-sm font-semibold uppercase tracking-widest text-muted-foreground">Canciones</h2>
+  </div>
+
+  <!-- Tabla de canciones -->
+  <div class="flex-1 overflow-y-auto scrollbar-thin scrollbar-thumb-muted scrollbar-track-transparent">
+
+    <!-- Cabecera de tabla -->
+    <div class="grid grid-cols-[2rem_1fr_1fr_4rem] gap-3 px-5 py-2 text-xs font-semibold uppercase tracking-wider text-muted-foreground border-b border-border sticky top-0 bg-background z-10">
+      <span class="text-center">#</span>
+      <span>Título</span>
+      <span>Artista · Album</span>
+      <span class="text-right">
+        <svg class="w-4 h-4 ml-auto" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M12 6v6l4 2" />
+          <circle cx="12" cy="12" r="10" stroke-linecap="round" stroke-linejoin="round" />
+        </svg>
+      </span>
+    </div>
+
+    <ul>
+      @for (cancion of canciones(); track cancion.id; let i = $index) {
+        <li class="group grid grid-cols-[2rem_1fr_1fr_4rem] gap-3 items-center px-5 py-3 hover:bg-muted transition-colors duration-100 cursor-pointer">
+
+          <span class="text-center text-sm text-muted-foreground group-hover:hidden">{{ i + 1 }}</span>
+          <svg class="hidden group-hover:block w-4 h-4 text-primary mx-auto" fill="currentColor" viewBox="0 0 24 24">
+            <path d="M8 5v14l11-7z" />
+          </svg>
+
+          <div class="flex flex-col min-w-0">
+            <span class="text-sm font-medium text-foreground truncate">{{ cancion.nombre }}</span>
+            <div class="flex gap-1.5 flex-wrap mt-0.5">
+              @for (genero of cancion.generoMusical.slice(0, 2); track genero) {
+                <span class="text-[10px] px-1.5 py-0.5 rounded-full bg-primary/10 text-primary font-medium">{{ genero }}</span>
+              }
+            </div>
+          </div>
+
+          <div class="flex flex-col min-w-0">
+            <span class="text-sm text-foreground truncate">{{ cancion.artista.nombre }}</span>
+            <span class="text-xs text-muted-foreground truncate">{{ cancion.album }}</span>
+          </div>
+
+          <span class="text-sm text-muted-foreground text-right tabular-nums">{{ formatDuracion(cancion.duracion) }}</span>
+
+        </li>
+      } @empty {
+        <li class="py-8 text-sm text-muted-foreground text-center">Sin canciones</li>
+      }
+    </ul>
+  </div>
+
+</div>

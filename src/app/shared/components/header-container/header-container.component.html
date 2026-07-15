@@ -1,0 +1,13 @@
+<div class="gap-3 p-4 mb-4 space-y-6 rounded-xl border border-border bg-background text-card-foreground">
+
+    <div class="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+      <div>
+        <h3 class="text-foreground font-semibold">{{title}}</h3>
+        <div class="text-muted-foreground text-xs font-medium text">{{subtitle}}</div>
+      </div>
+
+      @if (items.length > 0) {
+        <app-menu-floating [items]="items"></app-menu-floating>
+      }
+    </div>
+</div>

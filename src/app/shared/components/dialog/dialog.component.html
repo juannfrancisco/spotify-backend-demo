@@ -1,0 +1,66 @@
+@if (isOpen) {
+  <div
+    class="fixed inset-0 z-50 flex items-center justify-center overflow-y-auto bg-black/50 dark:bg-black/70 backdrop-blur-sm animate-fade-in"
+    role="dialog"
+    aria-modal="true"
+    [attr.aria-label]="title"
+    (click)="onClose()"
+    (keydown)="$event.key === 'Escape' && onClose()">
+    <div
+      class="relative mx-auto my-6 w-full max-w-2xl px-4 sm:px-6 animate-slide-up"
+      role="document"
+      (click)="$event.stopPropagation()"
+      (keydown)="$event.stopPropagation()"
+      (keyup)="$event.stopPropagation()"
+      tabindex="0">
+      <div
+        class="relative flex flex-col w-full rounded-xl border border-border bg-background shadow-2xl shadow-black/20 dark:shadow-black/50 overflow-hidden">
+
+        <!-- Header -->
+        <div class="flex items-center justify-between px-6 py-4 border-b border-border">
+          <h3 class="text-lg font-semibold text-foreground tracking-tight">{{ title }}</h3>
+          <button
+            type="button"
+            class="flex items-center justify-center h-8 w-8 rounded-lg text-muted-foreground hover:text-foreground hover:bg-muted focus:outline-none focus-visible:ring-2 focus-visible:ring-primary transition-colors duration-150 cursor-pointer"
+            aria-label="Cerrar diálogo"
+            (click)="onClose()">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" class="h-5 w-5">
+              <path d="M6.28 5.22a.75.75 0 0 0-1.06 1.06L8.94 10l-3.72 3.72a.75.75 0 1 0 1.06 1.06L10 11.06l3.72 3.72a.75.75 0 1 0 1.06-1.06L11.06 10l3.72-3.72a.75.75 0 0 0-1.06-1.06L10 8.94 6.28 5.22Z" />
+            </svg>
+          </button>
+        </div>
+
+        <!-- Content -->
+        <div class="px-6 py-5 text-sm leading-relaxed text-muted-foreground">
+          @if (message) {
+            <p>{{ message }}</p>
+          } @else {
+            <ng-content></ng-content>
+          }
+        </div>
+
+        <!-- Footer -->
+        @if (showFooter) {
+          <div class="flex items-center justify-end gap-3 px-6 py-4 border-t border-border">
+            @if (showCancelButton) {
+              <button
+                type="button"
+                class="inline-flex items-center justify-center rounded-lg px-5 py-2.5 text-sm font-medium text-foreground bg-muted hover:bg-muted/80 border border-border focus:outline-none focus-visible:ring-2 focus-visible:ring-primary transition-all duration-150 cursor-pointer"
+                (click)="onClose()">
+                {{ cancelText }}
+              </button>
+            }
+            @if (showConfirmButton) {
+              <button
+                type="button"
+                class="inline-flex items-center justify-center rounded-lg px-5 py-2.5 text-sm font-semibold text-primary-foreground bg-primary hover:bg-primary/90 focus:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:ring-offset-background transition-all duration-150 cursor-pointer"
+                (click)="onConfirm()">
+                {{ confirmText }}
+              </button>
+            }
+          </div>
+        }
+      </div>
+    </div>
+  </div>
+}
