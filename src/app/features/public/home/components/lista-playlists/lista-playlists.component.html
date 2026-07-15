@@ -18,7 +18,7 @@
   <!-- Lista -->
   <ul class="flex-1 overflow-y-auto py-2 scrollbar-thin scrollbar-thumb-muted scrollbar-track-transparent">
     @for (playlist of playlists(); track playlist.id) {
-      <li class="group flex items-center gap-3 px-4 py-3 cursor-pointer hover:bg-muted transition-colors duration-150 rounded-none">
+      <li (click)="verPlaylist(playlist.id)" class="group flex items-center gap-3 px-4 py-3 cursor-pointer hover:bg-muted transition-colors duration-150 rounded-none">
 
         <!-- Ícono playlist -->
         <div class="w-10 h-10 rounded-md bg-primary/10 flex items-center justify-center shrink-0">

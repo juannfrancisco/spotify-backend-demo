@@ -1,0 +1,72 @@
+@if (playlist(); as pl) {
+
+  <div class="flex flex-col h-full overflow-hidden">
+
+    <!-- Header -->
+    <div class="px-8 py-6 border-b border-border shrink-0 flex items-end gap-6">
+
+      <!-- Cover placeholder -->
+      <div class="w-28 h-28 rounded-xl bg-primary/10 flex items-center justify-center shrink-0 shadow-md">
+        <svg class="w-12 h-12 text-primary" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round"
+            d="M9 19V6l12-3v13M9 19c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zm12-3c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zM9 10l12-3" />
+        </svg>
+      </div>
+
+      <!-- Info -->
+      <div class="flex flex-col gap-1 min-w-0">
+        <span class="text-xs font-semibold uppercase tracking-widest text-muted-foreground">Playlist</span>
+        <h1 class="text-3xl font-bold text-foreground truncate">{{ pl.nombre }}</h1>
+        <span class="text-sm text-muted-foreground">
+          {{ pl.canciones.length }} canciones &bull; {{ formatDuracion(totalDuracion()) }} en total
+        </span>
+      </div>
+
+    </div>
+
+    <!-- Tabla de canciones -->
+    <div class="flex-1 overflow-y-auto">
+
+      @if (pl.canciones.length > 0) {
+        <table class="w-full text-sm">
+          <thead class="sticky top-0 bg-background z-10 border-b border-border">
+            <tr class="text-xs uppercase tracking-widest text-muted-foreground">
+              <th class="px-8 py-3 text-left w-10">#</th>
+              <th class="px-4 py-3 text-left">Canción</th>
+              <th class="px-4 py-3 text-left">Artista</th>
+              <th class="px-4 py-3 text-left">Álbum</th>
+              <th class="px-4 py-3 text-left">Género</th>
+              <th class="px-8 py-3 text-right">Duración</th>
+            </tr>
+          </thead>
+          <tbody>
+            @for (cancion of pl.canciones; track cancion.id; let i = $index) {
+              <tr class="group hover:bg-muted transition-colors duration-100">
+                <td class="px-8 py-3 text-muted-foreground text-right w-10">{{ i + 1 }}</td>
+                <td class="px-4 py-3 font-medium text-foreground">{{ cancion.nombre }}</td>
+                <td class="px-4 py-3 text-muted-foreground">{{ cancion.artista.nombre }}</td>
+                <td class="px-4 py-3 text-muted-foreground">{{ cancion.album }}</td>
+                <td class="px-4 py-3 text-muted-foreground">{{ cancion.generoMusical.join(', ') }}</td>
+                <td class="px-8 py-3 text-right text-muted-foreground tabular-nums">{{ formatDuracion(cancion.duracion) }}</td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      } @else {
+        <div class="flex flex-col items-center justify-center h-full gap-2 text-muted-foreground">
+          <svg class="w-10 h-10 opacity-30" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M9 9l10.5-3m0 6.553v3.75a2.25 2.25 0 01-1.632 2.163l-1.32.377a1.803 1.803 0 11-.99-3.467l2.31-.66a2.25 2.25 0 001.632-2.163zm0 0V2.25L9 5.25v10.303m0 0v3.75a2.25 2.25 0 01-1.632 2.163l-1.32.377a1.803 1.803 0 01-.99-3.467l2.31-.66A2.25 2.25 0 009 15.553z" />
+          </svg>
+          <p class="text-sm">Esta playlist no tiene canciones aún.</p>
+        </div>
+      }
+
+    </div>
+
+  </div>
+
+} @else {
+  <div class="flex items-center justify-center h-full text-muted-foreground text-sm">
+    Cargando playlist…
+  </div>
+}
