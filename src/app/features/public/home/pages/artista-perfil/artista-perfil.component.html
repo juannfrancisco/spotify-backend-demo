@@ -1,0 +1,99 @@
+@if (artista(); as a) {
+
+  <div class="flex flex-col h-full overflow-hidden">
+
+    <!-- Header -->
+    <div class="px-8 py-6 border-b border-border shrink-0 flex items-end gap-6">
+
+      <!-- Avatar -->
+      <div class="w-28 h-28 rounded-full bg-primary/10 flex items-center justify-center shrink-0 shadow-md">
+        <span class="text-4xl font-bold text-primary">{{ a.nombre[0] | uppercase }}</span>
+      </div>
+
+      <!-- Info -->
+      <div class="flex flex-col gap-1 min-w-0">
+        <div class="flex items-center gap-2">
+          <span class="text-xs font-semibold uppercase tracking-widest text-muted-foreground">Artista</span>
+          @if (a.verificado) {
+            <span class="inline-flex items-center gap-1 text-xs font-medium text-primary">
+              <svg class="w-3.5 h-3.5" fill="currentColor" viewBox="0 0 20 20">
+                <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 00-1.414 0L8 12.586 4.707 9.293a1 1 0 00-1.414 1.414l4 4a1 1 0 001.414 0l8-8a1 1 0 000-1.414z" clip-rule="evenodd"/>
+              </svg>
+              Verificado
+            </span>
+          }
+        </div>
+        <h1 class="text-3xl font-bold text-foreground truncate">{{ a.nombre }}</h1>
+        <div class="flex flex-wrap items-center gap-x-4 gap-y-1 text-sm text-muted-foreground">
+          <span>{{ a.pais }}</span>
+          <span>&bull;</span>
+          <span>{{ a.tipo }}</span>
+          <span>&bull;</span>
+          <span>{{ formatOyentes(a.oyentesMensuales) }} oyentes mensuales</span>
+        </div>
+        <div class="flex flex-wrap gap-1.5 mt-1">
+          @for (genero of a.generoMusical; track genero) {
+            <span class="text-xs px-2 py-0.5 rounded-full bg-muted text-muted-foreground border border-border">{{ genero }}</span>
+          }
+        </div>
+      </div>
+
+    </div>
+
+    <!-- Biografía -->
+    @if (a.biografia) {
+      <div class="px-8 py-4 border-b border-border shrink-0">
+        <p class="text-sm text-muted-foreground leading-relaxed max-w-2xl">{{ a.biografia }}</p>
+      </div>
+    }
+
+    <!-- Canciones -->
+    <div class="flex-1 overflow-y-auto">
+
+      <div class="px-8 py-4 shrink-0">
+        <h2 class="text-xs font-semibold uppercase tracking-widest text-muted-foreground">Canciones</h2>
+      </div>
+
+      @if (canciones().length > 0) {
+        <table class="w-full text-sm">
+          <thead class="sticky top-0 bg-background z-10 border-b border-border">
+            <tr class="text-xs uppercase tracking-widest text-muted-foreground">
+              <th class="px-8 py-3 text-left w-10">#</th>
+              <th class="px-4 py-3 text-left">Canción</th>
+              <th class="px-4 py-3 text-left">Álbum</th>
+              <th class="px-4 py-3 text-left">Género</th>
+              <th class="px-4 py-3 text-right">Reproducciones</th>
+              <th class="px-8 py-3 text-right">Duración</th>
+            </tr>
+          </thead>
+          <tbody>
+            @for (cancion of canciones(); track cancion.id; let i = $index) {
+              <tr class="group hover:bg-muted transition-colors duration-100">
+                <td class="px-8 py-3 text-muted-foreground text-right w-10">{{ i + 1 }}</td>
+                <td class="px-4 py-3 font-medium text-foreground">{{ cancion.nombre }}</td>
+                <td class="px-4 py-3 text-muted-foreground">{{ cancion.album }}</td>
+                <td class="px-4 py-3 text-muted-foreground">{{ cancion.generoMusical.join(', ') }}</td>
+                <td class="px-4 py-3 text-right text-muted-foreground tabular-nums">{{ formatOyentes(cancion.reproducciones) }}</td>
+                <td class="px-8 py-3 text-right text-muted-foreground tabular-nums">{{ formatDuracion(cancion.duracion) }}</td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      } @else {
+        <div class="flex flex-col items-center justify-center py-16 gap-2 text-muted-foreground">
+          <svg class="w-10 h-10 opacity-30" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M9 9l10.5-3m0 6.553v3.75a2.25 2.25 0 01-1.632 2.163l-1.32.377a1.803 1.803 0 11-.99-3.467l2.31-.66a2.25 2.25 0 001.632-2.163zm0 0V2.25L9 5.25v10.303m0 0v3.75a2.25 2.25 0 01-1.632 2.163l-1.32.377a1.803 1.803 0 01-.99-3.467l2.31-.66A2.25 2.25 0 009 15.553z" />
+          </svg>
+          <p class="text-sm">Este artista no tiene canciones registradas.</p>
+        </div>
+      }
+
+    </div>
+
+  </div>
+
+} @else {
+  <div class="flex items-center justify-center h-full text-muted-foreground text-sm">
+    Cargando artista…
+  </div>
+}
