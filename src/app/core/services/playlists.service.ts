@@ -23,4 +23,8 @@ export class PlaylistsService {
   create(playlist: CreatePlaylistDto): Observable<Playlist> {
     return this.http.post<Playlist>(this.baseUrl, playlist);
   }
+
+  addCancion(playlistId: number, cancionId: number): Observable<Playlist> {
+    return this.http.post<Playlist>(`${this.baseUrl}/${playlistId}/canciones/${cancionId}`, {});
+  }
 }

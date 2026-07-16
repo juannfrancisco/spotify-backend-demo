@@ -1,4 +1,4 @@
-<div class="flex flex-col h-full">
+<div class="flex flex-col h-full" (click)="cerrarMenu()">
 
   <!-- Header -->
   <div class="px-5 py-4 border-b border-border shrink-0">
@@ -9,7 +9,7 @@
   <div class="flex-1 overflow-y-auto scrollbar-thin scrollbar-thumb-muted scrollbar-track-transparent">
 
     <!-- Cabecera de tabla -->
-    <div class="grid grid-cols-[2rem_1fr_1fr_4rem] gap-3 px-5 py-2 text-xs font-semibold uppercase tracking-wider text-muted-foreground border-b border-border sticky top-0 bg-background z-10">
+    <div class="grid grid-cols-[2rem_1fr_1fr_4rem_2rem] gap-3 px-5 py-2 text-xs font-semibold uppercase tracking-wider text-muted-foreground border-b border-border sticky top-0 bg-background z-10">
       <span class="text-center">#</span>
       <span>Título</span>
       <span>Artista · Album</span>
@@ -19,11 +19,12 @@
           <circle cx="12" cy="12" r="10" stroke-linecap="round" stroke-linejoin="round" />
         </svg>
       </span>
+      <span></span>
     </div>
 
     <ul>
       @for (cancion of canciones(); track cancion.id; let i = $index) {
-        <li class="group grid grid-cols-[2rem_1fr_1fr_4rem] gap-3 items-center px-5 py-3 hover:bg-muted transition-colors duration-100 cursor-pointer">
+        <li class="group relative grid grid-cols-[2rem_1fr_1fr_4rem_2rem] gap-3 items-center px-5 py-3 hover:bg-muted transition-colors duration-100 cursor-pointer">
 
           <span class="text-center text-sm text-muted-foreground group-hover:hidden">{{ i + 1 }}</span>
           <svg class="hidden group-hover:block w-4 h-4 text-primary mx-auto" fill="currentColor" viewBox="0 0 24 24">
@@ -46,6 +47,21 @@
 
           <span class="text-sm text-muted-foreground text-right tabular-nums">{{ formatDuracion(cancion.duracion) }}</span>
 
+          <!-- Botón tres puntos -->
+          <div class="flex items-center justify-center">
+            <button
+              (click)="toggleMenu(cancion.id, $event)"
+              class="opacity-0 group-hover:opacity-100 p-1 rounded hover:bg-muted-foreground/20 text-muted-foreground hover:text-foreground transition-all"
+              title="Más opciones"
+            >
+              <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
+                <circle cx="5" cy="12" r="1.5" />
+                <circle cx="12" cy="12" r="1.5" />
+                <circle cx="19" cy="12" r="1.5" />
+              </svg>
+            </button>
+          </div>
+
         </li>
       } @empty {
         <li class="py-8 text-sm text-muted-foreground text-center">Sin canciones</li>
@@ -54,3 +70,33 @@
   </div>
 
 </div>
+
+<!-- Dropdown con position:fixed para evitar clipping del overflow-y-auto -->
+@if (menuAbiertoId() !== null) {
+  <div
+    class="fixed w-52 bg-popover border border-border rounded-md shadow-lg z-[9999] py-1"
+    [style.top.px]="menuPos().top"
+    [style.right.px]="menuPos().right"
+    (click)="$event.stopPropagation()"
+  >
+    <p class="px-3 py-1.5 text-xs font-semibold uppercase tracking-wider text-muted-foreground">Agregar a playlist</p>
+
+    @if (playlists().length === 0) {
+      <p class="px-3 py-2 text-xs text-muted-foreground">Sin playlists disponibles</p>
+    }
+
+    @for (playlist of playlists(); track playlist.id) {
+      <button
+        (click)="agregarAPlaylist(playlist.id, menuAbiertoId()!, $event)"
+        class="w-full text-left px-3 py-2 text-sm hover:bg-muted transition-colors flex items-center gap-2"
+      >
+        <svg class="w-4 h-4 shrink-0 text-muted-foreground" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M9 19V6l12-3v13" />
+          <circle cx="6" cy="18" r="3" />
+          <circle cx="18" cy="15" r="3" />
+        </svg>
+        <span class="truncate">{{ playlist.nombre }}</span>
+      </button>
+    }
+  </div>
+}
